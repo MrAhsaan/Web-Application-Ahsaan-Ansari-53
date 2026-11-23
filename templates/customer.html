@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head">
+    <div><span class="tag">CUSTOMER #{{ customer.id }}</span><h1>{{ customer.name }}</h1><p>{{ customer.phone }} · {{ customer.email or 'No email' }}</p></div>
+    <div class="actions">
+      <a class="btn outline" href="{{ url_for('customers.customer_edit', cid=customer.id) }}">Edit Customer</a>
+      <a class="btn outline" href="{{ url_for('customers.customers') }}">← Customers</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div><b>{{ vehicles|length }}</b><small>VEHICLES</small></div>
+    <div><b>{{ booking_count }}</b><small>BOOKINGS</small></div>
+    <div><b>{{ jobs|length }}</b><small>JOB CARDS</small></div>
+    <div><b>{{ customer.phone }}</b><small>PRIMARY PHONE</small></div>
+  </div>
+
+  <div class="two">
+    <form class="panel" method="POST" action="{{ url_for('customers.vehicle_add', cid=customer.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <h2>Add Vehicle</h2>
+      <label>Registration<input name="registration" placeholder="MH12AB1234"></label>
+      <div class="row">
+        <label>Brand<input name="brand" placeholder="Toyota"></label>
+        <label>Model<input name="model" placeholder="Innova" required></label>
+      </div>
+      <div class="row">
+        <label>Year<input type="number" min="1900" max="2100" name="year"></label>
+        <label>Fuel<select name="fuel"><option value="">Select fuel</option><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Hybrid</option><option>EV</option></select></label>
+      </div>
+      <div class="row">
+        <label>Color<input name="color" placeholder="White"></label>
+        <label>VIN<input name="vin" maxlength="17" placeholder="17-character VIN"></label>
+      </div>
+      <label>Notes<textarea name="notes" rows="3" placeholder="Vehicle-specific notes"></textarea></label>
+      <button class="btn primary">Add Vehicle</button>
+    </form>
+
+    <div class="panel">
+      <h2>Vehicles</h2>
+      {% for v in vehicles %}
+      <div class="list-row vehicle-row">
+        <div>
+          <b>{{ v.registration or 'No registration' }}</b>
+          <small>{{ v.brand or 'Unknown brand' }} {{ v.model }} · {{ v.year or 'Year —' }} · {{ v.fuel or 'Fuel —' }}{% if v.color %} · {{ v.color }}{% endif %}</small>
+          {% if v.vin %}<small>VIN: {{ v.vin }}</small>{% endif %}
+        </div>
+        <div class="actions compact">
+          <a href="{{ url_for('customers.vehicle_edit', vid=v.id) }}">Edit</a>
+          {% if not v.has_jobs %}
+          <form method="post" action="{{ url_for('customers.vehicle_delete', vid=v.id) }}" onsubmit="return confirm('Delete this vehicle?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="link-danger">Delete</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}<p class="hint">No vehicles registered for this customer.</p>{% endfor %}
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>Customer Information</h2>
+    <div class="info-grid">
+      <div><small>PHONE</small><b>{{ customer.phone }}</b></div>
+      <div><small>EMAIL</small><b>{{ customer.email or '—' }}</b></div>
+      <div><small>ADDRESS</small><b>{{ customer.address or '—' }}</b></div>
+      <div><small>NOTES</small><b>{{ customer.notes or '—' }}</b></div>
+    </div>
+    <form method="post" action="{{ url_for('customers.customer_delete', cid=customer.id) }}" onsubmit="return confirm('Delete this customer and their vehicles? This cannot be undone.');" class="danger-zone">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn danger" type="submit">Delete Customer</button>
+      <span>Deletion is blocked automatically when service history exists.</span>
+    </form>
+  </section>
+
+  <section class="panel"><h2>Job History</h2>
+    {% for j in jobs %}
+    <div class="list-row"><div><b>Job #{{ j.id }} · {{ j.status }}</b><small>{{ j.registration or '—' }} · ₹{{ "%.2f"|format(j.total or 0) }} · {{ j.created_at }}</small></div><a href="{{ url_for('jobs.job_view', jid=j.id) }}">Open →</a></div>
+    {% else %}<p class="hint">No job cards yet.</p>{% endfor %}
+  </section>
+</main>
+{% endblock %}

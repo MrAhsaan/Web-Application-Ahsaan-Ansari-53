@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head"><div><span class="tag">BUSINESS INTELLIGENCE</span><h1>Reports & <em>Analytics</em></h1><p>{{start}} to {{end}}</p></div>
+    <div class="quick"><a class="btn outline" href="{{url_for('dashboard.reports_export', period=period)}}">Export Payments CSV</a></div></div>
+  <div class="filters"><a class="btn {% if period=='7' %}primary{% else %}outline{% endif %}" href="?period=7">7 Days</a><a class="btn {% if period=='30' %}primary{% else %}outline{% endif %}" href="?period=30">30 Days</a><a class="btn {% if period=='90' %}primary{% else %}outline{% endif %}" href="?period=90">90 Days</a><a class="btn {% if period=='365' %}primary{% else %}outline{% endif %}" href="?period=365">1 Year</a></div>
+
+  <div class="stats">
+    <div><small>BOOKINGS</small><b>{{summary.bookings}}</b></div><div><small>JOB CARDS</small><b>{{summary.jobs}}</b></div><div><small>NEW CUSTOMERS</small><b>{{summary.new_customers}}</b></div><div><small>COLLECTION</small><b>₹{{"%.2f"|format(summary.collection)}}</b></div><div><small>BILLED</small><b>₹{{"%.2f"|format(summary.billed)}}</b></div>
+  </div>
+
+  <section class="report-grid">
+    <div class="panel"><h2>Daily <em>Performance</em></h2><div class="table-wrap"><table><tr><th>Date</th><th>Bookings</th><th>Collection</th></tr>{% for r in daily %}<tr><td>{{r.date}}</td><td>{{r.bookings}}</td><td>₹{{"%.2f"|format(r.collection)}}</td></tr>{% endfor %}</table></div></div>
+    <div class="panel"><h2>Job <em>Status</em></h2><div class="metric-list">{% for r in job_status %}<div><span>{{r.status}}</span><b>{{r.count}}</b></div>{% else %}<p class="empty">No job cards yet.</p>{% endfor %}</div></div>
+  </section>
+
+  <section class="report-grid">
+    <div class="panel"><h2>Technician <em>Performance</em></h2><div class="table-wrap"><table><tr><th>Technician</th><th>Jobs</th><th>Closed</th></tr>{% for r in technicians %}<tr><td>{{r.name}}</td><td>{{r.jobs}}</td><td>{{r.closed}}</td></tr>{% else %}<tr><td colspan="3" class="empty">No technician data yet.</td></tr>{% endfor %}</table></div></div>
+    <div class="panel"><h2>Top <em>Services</em></h2><div class="table-wrap"><table><tr><th>Service</th><th>Qty</th><th>Revenue</th></tr>{% for r in services %}<tr><td>{{r.name}}</td><td>{{"%.2f"|format(r.quantity)}}</td><td>₹{{"%.2f"|format(r.revenue)}}</td></tr>{% else %}<tr><td colspan="3" class="empty">No service data yet.</td></tr>{% endfor %}</table></div></div>
+  </section>
+
+  <section class="panel"><h2>Outstanding <em>Invoices</em></h2><div class="table-wrap"><table><tr><th>Invoice</th><th>Customer</th><th>Vehicle</th><th>Total</th><th>Paid</th><th>Balance</th></tr>{% for r in outstanding %}<tr><td><b>{{r.invoice_no}}</b></td><td>{{r.customer_name}}</td><td>{{r.registration or '—'}} {{r.brand or ''}} {{r.model}}</td><td>₹{{"%.2f"|format(r.total)}}</td><td>₹{{"%.2f"|format(r.paid_amount)}}</td><td><b>₹{{"%.2f"|format(r.balance)}}</b></td></tr>{% else %}<tr><td colspan="6" class="empty">No outstanding invoices.</td></tr>{% endfor %}</table></div></section>
+</main>
+{% endblock %}

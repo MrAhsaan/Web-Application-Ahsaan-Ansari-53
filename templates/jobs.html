@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head">
+    <div><span class="tag">WORKSHOP</span><h1>Job <em>Cards</em></h1><p>Track inspections, technicians, work performed and workshop costs.</p></div>
+    <a class="btn primary" href="{{ url_for('jobs.job_new') }}">+ New Job Card</a>
+  </div>
+  <div class="stats">
+    {% for s in statuses %}<div><small>{{ s|upper }}</small><b>{{ counts[s] }}</b></div>{% endfor %}
+  </div>
+  <form class="panel filter-bar" method="GET">
+    <input name="q" value="{{ q }}" placeholder="Search job #, customer, phone, registration, model or technician">
+    <select name="status"><option value="">All statuses</option>{% for s in statuses %}<option value="{{s}}" {% if status==s %}selected{% endif %}>{{s}}</option>{% endfor %}</select>
+    <button class="btn outline">Search</button>
+  </form>
+  <section class="panel table-wrap"><table>
+    <tr><th>Job</th><th>Customer</th><th>Vehicle</th><th>Technician</th><th>Status</th><th>Total</th><th>Action</th></tr>
+    {% for j in jobs %}
+    <tr><td><b>#{{j.id}}</b><small>{{j.created_at}}</small></td><td><b>{{j.customer_name}}</b><small>{{j.phone}}</small></td><td>{{j.registration or '—'}}<small>{{j.brand or ''}} {{j.model}}</small></td><td>{{j.technician_name or 'Unassigned'}}</td><td>{{j.status}}</td><td>₹{{"%.2f"|format(j.total or 0)}}</td><td><a class="btn outline" href="{{url_for('jobs.job_view',jid=j.id)}}">Open →</a></td></tr>
+    {% else %}<tr><td colspan="7" class="empty">No job cards found.</td></tr>{% endfor %}
+  </table></section>
+</main>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block content %}
+<main class="container admin confirmation">
+  <div class="confirm-card">
+    <span class="tag">APPOINTMENT RECEIVED</span>
+    <h1>Booking <em>Confirmed for Review</em></h1>
+    <p>Your appointment request has been submitted successfully. The garage team will confirm it.</p>
+    <div class="booking-number">{{ booking_no }}</div>
+    <div class="confirm-grid">
+      <div><small>CUSTOMER</small><b>{{ booking.customer_name }}</b></div>
+      <div><small>VEHICLE</small><b>{{ booking.registration or 'Not provided' }} · {{ booking.brand or '' }} {{ booking.model }}</b></div>
+      <div><small>SERVICE</small><b>{{ booking.service_name }}</b></div>
+      <div class="confirm-address"><small>HOME / PICKUP ADDRESS</small><b>{{ booking.customer_address or '—' }}</b></div>
+      <div><small>DATE & TIME</small><b>{{ booking.date }} · {{ booking.time }}</b></div>
+    </div>
+    <a class="btn primary" href="{{ url_for('bookings.main_home') }}">Back to Home</a>
+  </div>
+</main>
+{% endblock %}

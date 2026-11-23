@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}AutoCare Garage | Complete Car Care{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">PROFESSIONAL AUTO CARE</span>
+      <h1>Your Car.<br><em>Our Responsibility.</em></h1>
+      <p class="hero-lead">Complete car care under one roof — servicing, mechanical repairs, detailing, denting & painting, washing and more.</p>
+      <div class="actions"><a class="btn primary" href="#booking">Book a Service <span>→</span></a><a class="btn outline" href="#services">Explore Services</a></div>
+      <div class="trust-row"><span>✓ Trained technicians</span><span>✓ Transparent billing</span><span>✓ Easy appointments</span></div>
+    </div>
+    <div class="hero-visual hero-photo" aria-label="Modern luxury vehicle photographed in dramatic studio lighting">
+      <div class="hero-image-wrap"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1500&q=85" alt="Modern Porsche sports car in a premium automotive photograph" fetchpriority="high"><div class="hero-image-shade"></div></div>
+      <div class="orb orb-a"></div><div class="orb orb-b"></div>
+      <div class="experience"><b>01</b><span>PRECISION<br>CAR CARE</span></div>
+      <div class="hero-image-caption"><span>ENGINEERED FOR THE ROAD</span><b>Every detail matters.</b></div>
+    </div>
+  </div>
+</section>
+
+<section class="section proof-strip">
+  <div class="container proof-grid"><div><b>01</b><span>Book online</span><small>Choose your preferred slot</small></div><div><b>02</b><span>We inspect</span><small>Diagnosis before major work</small></div><div><b>03</b><span>We repair</span><small>Track the job from start to finish</small></div><div><b>04</b><span>Drive happy</span><small>Clear invoice and payment record</small></div></div>
+</section>
+
+<section class="section" id="services"><div class="container"><div class="section-head"><div><span class="eyebrow">WHAT WE DO</span><h2>Everything Your<br><em>Car Needs.</em></h2></div><p>From routine maintenance to bigger repairs, our workshop workflow keeps every service organized.</p></div><div class="service-grid">
+{% set icons=['🔧','🎨','✨','⚡','❄️','🛞','🛢️','⭐','🚗'] %}
+{% for s in services %}<article class="service-card"><div class="service-top"><b>{{ icons[loop.index0 % icons|length] }}</b><small>0{{ loop.index }}</small></div><h3>{{ s.name if s.name is defined else s }}</h3><p>Professional {{ (s.name if s.name is defined else s)|lower }} with trained technicians and quality equipment.</p><a href="#booking">Book this service <span>→</span></a></article>{% endfor %}
+</div></div></section>
+
+<section class="section dark-band" id="why-us"><div class="container"><div class="section-head"><div><span class="eyebrow">WHY AUTOCARE</span><h2>A better way to<br><em>service your car.</em></h2></div></div><div class="benefit-grid"><article><span>01</span><h3>One complete workflow</h3><p>Booking, job cards, estimates, invoices and payments stay connected.</p></article><article><span>02</span><h3>Clear communication</h3><p>Know what your car needs and keep the service journey organized.</p></article><article><span>03</span><h3>Professional records</h3><p>Vehicle and service history can be maintained for future visits.</p></article><article><span>04</span><h3>Transparent billing</h3><p>Itemized charges and payment records make the final bill easy to understand.</p></article></div></div></section>
+
+<section class="section booking" id="booking"><div class="container booking-box"><div class="booking-intro"><span class="eyebrow">SERVICE APPOINTMENT</span><h2>Book your<br><em>service.</em></h2><p>Share your vehicle details and <strong>service address</strong>, then choose a convenient appointment slot.</p><div class="booking-benefits"><span>✓ Quick online request</span><span>✓ Unique booking ID</span><span>✓ Address shared with the garage team</span><span>✓ Pickup/drop option</span></div></div><form method="POST" action="{{ url_for('bookings.book') }}" data-booking-form>
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><div class="form-progress" data-progress><div class="progress-line"></div><span data-step-dot class="active">1</span><span data-step-dot>2</span><span data-step-dot>3</span></div>
+<fieldset data-step><legend>Customer & Vehicle</legend><div class="form-grid"><label>Name *<input name="name" required autocomplete="name"></label><label>Phone *<input name="phone" required inputmode="tel" autocomplete="tel" placeholder="+919876543210 for SMS/WhatsApp"></label><label>Email<input type="email" name="email" autocomplete="email"></label><label class="full-field">Home / Pickup Address *<textarea name="address" rows="2" required maxlength="500" autocomplete="street-address" placeholder="House / street, area, city, state and PIN code"></textarea><small class="field-help">Required so our team knows where to reach you for a home visit.</small></label><label>Registration<input name="registration" placeholder="MH12AB1234"></label><label>Brand<input name="brand"></label><label>Car Model *<input name="car_model" required></label><label>Year<input type="number" name="year" min="1900" max="2100"></label><label>Fuel<select name="fuel"><option value="">Select</option><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option><option>Hybrid</option></select></label></div><button type="button" class="btn primary full" data-next>Continue to Service →</button></fieldset>
+<fieldset data-step hidden><legend>Service & Schedule</legend><div class="form-grid"><label>Service *<select name="service_id" required><option value="">Select a service</option>{% for s in services %}<option value="{{ s.id if s.id is defined else loop.index }}">{{ s.name if s.name is defined else s }}</option>{% endfor %}</select></label><label>Date *<input type="date" name="date" min="{{ now_date }}" required></label><label>Time Slot *<select name="time" required><option value="">Select time</option>{% for slot in time_slots %}<option>{{ slot }}</option>{% endfor %}</select></label><label>Preferred Contact<select name="preferred_contact"><option>Phone</option><option>WhatsApp</option><option>Email</option></select></label></div><label class="consent-row"><input type="checkbox" name="whatsapp_opt_in"> I agree to receive booking status updates on WhatsApp. Message and data rates may apply.</label><div class="form-actions"><button type="button" class="btn outline" data-back>← Back</button><button type="button" class="btn primary" data-next>Continue →</button></div></fieldset>
+<fieldset data-step hidden><legend>Final Details</legend><div class="check-grid"><label><input type="checkbox" name="pickup_required"> Pickup required</label><label><input type="checkbox" name="drop_required"> Drop service required</label></div><label>Problem / Message<textarea name="message" rows="5" placeholder="Tell us what your car needs..."></textarea></label><div class="form-actions"><button type="button" class="btn outline" data-back>← Back</button><button class="btn primary" type="submit">Submit Appointment Request <span>→</span></button></div><small class="form-note">By submitting, you are requesting an appointment. The garage can confirm or reschedule the slot.</small></fieldset>
+</form></div></section>
+
+<section class="section faq" id="faq"><div class="container narrow"><div class="section-head"><div><span class="eyebrow">NEED TO KNOW</span><h2>Frequently asked<br><em>questions.</em></h2></div></div>{% for q,a in [('Do I need an appointment?','Appointments help us plan workshop capacity, but you can contact the garage to ask about same-day availability.'),('Will I get a booking confirmation?','After submitting the form, you receive a booking reference. Staff can then confirm the appointment.'),('Can I request pickup or drop service?','Yes. Select the pickup and/or drop option while making your appointment request.'),('Can I pay online?','The management system records Cash, UPI, Card, Bank Transfer and other payment methods.') ] %}<article class="faq-item" data-faq><button type="button"><span>{{ q }}</span><b>+</b></button><p>{{ a }}</p></article>{% endfor %}</div></section>
+
+<section class="vehicle-showcase" id="featured-vehicles">
+  <div class="container">
+    <div class="showcase-heading">
+      <div><span class="eyebrow">DESIGN. PERFORMANCE. PRESENCE.</span><h2>Built for the<br><em>love of driving.</em></h2></div>
+      <p>Modern automotive design deserves thoughtful care. From sculpted bodywork to precision engineering, we help keep every drive feeling exceptional.</p>
+    </div>
+    <div class="vehicle-gallery">
+      <article class="vehicle-card vehicle-card-wide">
+        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1800&q=85" alt="Contemporary premium car photographed from the front" loading="lazy">
+        <div class="vehicle-overlay"><span>01 / THE DETAILS</span><h3>Design that<br>turns heads.</h3><a href="#booking">Care for your vehicle <b>↗</b></a></div>
+      </article>
+      <article class="vehicle-card">
+        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85" alt="Modern performance car with bold body styling" loading="lazy">
+        <div class="vehicle-overlay"><span>02 / PERFORMANCE</span><h3>Ready for<br>every road.</h3><a href="#booking">Book maintenance <b>↗</b></a></div>
+      </article>
+      <article class="vehicle-card">
+        <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=85" alt="Luxury executive car with refined exterior design" loading="lazy">
+        <div class="vehicle-overlay"><span>03 / REFINEMENT</span><h3>Luxury in<br>every line.</h3><a href="#booking">Explore car care <b>↗</b></a></div>
+      </article>
+    </div>
+    <div class="showcase-footer"><span>YOUR VEHICLE. OUR CRAFT.</span><span>DETAILING · MAINTENANCE · REPAIR</span></div>
+  </div>
+</section>
+
+<section class="cta"><div class="container cta-inner"><div><span class="eyebrow">READY WHEN YOU ARE</span><h2>Give your car<br><em>the care it deserves.</em></h2></div><a class="btn primary" href="#booking">Book a Service →</a></div></section>
+{% endblock %}

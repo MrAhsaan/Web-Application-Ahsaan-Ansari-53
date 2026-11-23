@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head"><div><span class="tag">EDIT VEHICLE</span><h1>{{ vehicle.registration or vehicle.model }}</h1><p>Owner: {{ vehicle.customer_name }}</p></div><a class="btn outline" href="{{ url_for('customers.customer_detail', cid=vehicle.customer_id) }}">← Back</a></div>
+  <form class="panel form-wide" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Registration<input name="registration" value="{{ vehicle.registration or '' }}" placeholder="MH12AB1234"></label>
+    <div class="row"><label>Brand<input name="brand" value="{{ vehicle.brand or '' }}"></label><label>Model<input name="model" value="{{ vehicle.model }}" required></label></div>
+    <div class="row"><label>Year<input type="number" min="1900" max="2100" name="year" value="{{ vehicle.year or '' }}"></label><label>Fuel<select name="fuel"><option value="">Select fuel</option>{% for f in ['Petrol','Diesel','CNG','Hybrid','EV'] %}<option {% if vehicle.fuel==f %}selected{% endif %}>{{ f }}</option>{% endfor %}</select></label></div>
+    <div class="row"><label>Color<input name="color" value="{{ vehicle.color or '' }}"></label><label>VIN<input name="vin" maxlength="17" value="{{ vehicle.vin or '' }}"></label></div>
+    <label>Notes<textarea name="notes" rows="4">{{ vehicle.notes or '' }}</textarea></label>
+    <div class="actions"><button class="btn primary">Save Vehicle</button><a class="btn outline" href="{{ url_for('customers.customer_detail', cid=vehicle.customer_id) }}">Cancel</a></div>
+  </form>
+</main>
+{% endblock %}

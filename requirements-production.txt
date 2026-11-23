@@ -1,0 +1,5 @@
+# Install after requirements.txt on Linux production hosts.
+-r requirements.txt
+gunicorn>=22.0,<24
+
+razorpay>=1.4,<2

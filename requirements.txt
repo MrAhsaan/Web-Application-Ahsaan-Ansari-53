@@ -1,0 +1,6 @@
+Flask>=3.0,<4
+reportlab>=4.0,<5
+pytest>=8.0,<9
+twilio>=9.0,<10
+
+razorpay>=1.4,<2

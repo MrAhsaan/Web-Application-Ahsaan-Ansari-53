@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Notification Logs | AutoCare Garage{% endblock %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head">
+    <div><span class="tag">CUSTOMER COMMUNICATION</span><h1>Notification <em>Logs</em></h1><p>Latest 300 email, SMS and WhatsApp notification attempts.</p></div>
+    <a class="btn outline" href="{{ url_for('bookings.booking_list') }}">Back to Bookings</a>
+  </div>
+  <div class="panel">
+    <p class="hint">“Submitted” means the provider accepted the request; it does not guarantee delivery to the customer's inbox or device. “Skipped” usually means a channel is not configured or the customer has not opted in.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Time</th><th>Booking</th><th>Status event</th><th>Channel</th><th>Recipient</th><th>Result</th><th>Provider status / ID</th><th>Details</th></tr></thead>
+      <tbody>{% for n in notifications %}
+        <tr><td>{{ n.created_at }}</td><td>{{ n.booking_no or '—' }}</td><td>{{ n.event_status }}</td><td>{{ n.channel|upper }}</td><td>{{ n.recipient_masked or '—' }}</td><td><span class="tag">{{ n.status|upper }}</span></td><td>{{ n.provider_status or '—' }}<small>{{ n.provider_message_id or '' }}</small></td><td>{{ n.error_message or '—' }}</td></tr>
+      {% else %}<tr><td colspan="8" class="empty">No notification attempts recorded yet.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+</main>
+{% endblock %}

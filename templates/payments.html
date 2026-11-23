@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head"><div><span class="tag">FINANCE</span><h1>Payments & <em>Collections</em></h1><p>Track received payments, outstanding balances and daily collections.</p></div></div>
+  <section class="stats">
+    <div class="stat"><small>FILTERED COLLECTION</small><strong>₹{{ "%.2f"|format(total_collected) }}</strong></div>
+    <div class="stat"><small>OUTSTANDING BALANCE</small><strong>₹{{ "%.2f"|format(outstanding_total) }}</strong></div>
+    <div class="stat"><small>PAYMENTS</small><strong>{{ payments|length }}</strong></div>
+    <div class="stat"><small>OUTSTANDING INVOICES</small><strong>{{ outstanding|length }}</strong></div>
+  </section>
+  <section class="panel">
+    <h2>Collection Filters</h2>
+    <form class="form-grid" method="get">
+      <label>From <input type="date" name="from" value="{{ from_date }}"></label>
+      <label>To <input type="date" name="to" value="{{ to_date }}"></label>
+      <label>Method <select name="method"><option value="">All methods</option>{% for m in methods %}<option value="{{m}}" {% if method==m %}selected{% endif %}>{{m}}</option>{% endfor %}</select></label>
+      <div><button class="btn" type="submit">Apply Filter</button> <a class="btn outline" href="{{url_for('invoices.payments_home')}}">Clear</a></div>
+    </form>
+    {% if by_method %}<div class="table-wrap"><table><tr><th>Method</th><th>Collected</th></tr>{% for row in by_method %}<tr><td>{{row.payment_method}}</td><td>₹{{"%.2f"|format(row.total)}}</td></tr>{% endfor %}</table></div>{% endif %}
+  </section>
+  <section class="panel"><h2>Payment History</h2><div class="table-wrap"><table><tr><th>Receipt</th><th>Date</th><th>Invoice</th><th>Customer</th><th>Method</th><th>Amount</th><th>Action</th></tr>
+    {% for p in payments %}<tr><td>PAY-{{"%06d"|format(p.id)}}</td><td>{{p.payment_date}}</td><td>{{p.invoice_no}}</td><td>{{p.customer_name}}</td><td>{{p.payment_method}}</td><td>₹{{"%.2f"|format(p.amount)}}</td><td><a class="btn outline" href="{{url_for('invoices.payment_receipt',pid=p.id)}}">Receipt PDF</a></td></tr>{% else %}<tr><td colspan="7">No payments found for the selected filters.</td></tr>{% endfor %}
+  </table></div></section>
+  <section class="panel"><h2>Outstanding Invoices</h2><div class="table-wrap"><table><tr><th>Invoice</th><th>Customer</th><th>Vehicle</th><th>Total</th><th>Paid</th><th>Balance</th><th>Action</th></tr>
+    {% for i in outstanding %}<tr><td>{{i.invoice_no}}</td><td>{{i.customer_name}}<br><small>{{i.phone}}</small></td><td>{{i.registration or ''}} {{i.brand or ''}} {{i.model}}</td><td>₹{{"%.2f"|format(i.total)}}</td><td>₹{{"%.2f"|format(i.paid_amount)}}</td><td><strong>₹{{"%.2f"|format(i.balance)}}</strong></td><td><a class="btn outline" href="{{url_for('jobs.job_view',jid=i.id)}}">Open Job</a></td></tr>{% else %}<tr><td colspan="7">No outstanding invoices. All invoices are fully paid.</td></tr>{% endfor %}
+  </table></div></section>
+</main>
+{% endblock %}

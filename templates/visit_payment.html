@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Home Visit Payment · AutoCare Garage{% endblock %}
+{% block content %}
+<section class="section"><div class="container narrow">
+  <div class="section-head"><div><span class="eyebrow">SECURE ADVANCE PAYMENT</span><h1>Home Visit <em>Charge</em></h1></div></div>
+  <div class="card">
+    <p><strong>Booking:</strong> {{ booking.booking_no }}</p>
+    <p><strong>Customer:</strong> {{ booking.customer_name }}</p>
+    <p><strong>Service:</strong> {{ booking.service_name or 'Home inspection' }}</p>
+    <p><strong>Appointment:</strong> {{ booking.date }} · {{ booking.time }}</p>
+    {% if paid %}
+      <div class="flash success">Payment verified. Your fixed home-visit charge of ₹{{ '%.2f'|format(booking.home_visit_charge) }} has been received. The garage can now arrange staff dispatch. Repair costs, if any, will be estimated separately after inspection.</div>
+    {% elif unavailable %}
+      <div class="flash error">Online payment is not currently available for this booking. Please contact the garage.</div>
+    {% else %}
+      <p><strong>Fixed visit charge:</strong> <span class="price">₹{{ '%.2f'|format(booking.home_visit_charge) }}</span></p>
+      <p>This payment covers the fixed home-visit/inspection charge only. Additional repair work and parts will be estimated separately and require your approval.</p>
+      <button class="btn primary" id="pay-visit-charge" type="button">Pay ₹{{ '%.2f'|format(booking.home_visit_charge) }} securely</button>
+      <p class="muted">Staff dispatch is allowed only after the payment provider confirms the payment is captured.</p>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      <form id="razorpay-verify-form" method="post" action="{{ url_for('bookings.verify_visit_payment', booking_no=booking.booking_no, token=booking.visit_payment_token) }}" hidden>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+      </form>
+      <script>
+      document.getElementById('pay-visit-charge').addEventListener('click', function () {
+        const options = {
+          key: {{ key_id|tojson }}, amount: {{ amount|int }}, currency: 'INR',
+          name: 'AutoCare Garage', description: 'Fixed home-visit charge · {{ booking.booking_no }}',
+          order_id: {{ booking.razorpay_order_id|tojson }},
+          handler: function (response) {
+            document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id || '';
+            document.getElementById('razorpay_order_id').value = response.razorpay_order_id || '';
+            document.getElementById('razorpay_signature').value = response.razorpay_signature || '';
+            document.getElementById('razorpay-verify-form').submit();
+          },
+          prefill: { name: {{ (booking.customer_name or '')|tojson }}, email: {{ (booking.email or '')|tojson }}, contact: {{ (booking.phone or '')|tojson }} },
+          theme: { color: '#ff5722' }
+        };
+        const checkout = new Razorpay(options);
+        checkout.on('payment.failed', function () { window.alert('Payment did not complete. Please try again or contact the garage.'); });
+        checkout.open();
+      });
+      </script>
+    {% endif %}
+  </div>
+</div></section>
+{% endblock %}

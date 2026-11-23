@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head"><div><span class="tag">EDIT CUSTOMER</span><h1>{{ customer.name }}</h1><p>Update contact and account information.</p></div><a class="btn outline" href="{{ url_for('customers.customer_detail', cid=customer.id) }}">← Back</a></div>
+  <form class="panel form-wide" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row">
+      <label>Name<input name="name" value="{{ customer.name }}" required></label>
+      <label>Phone<input name="phone" value="{{ customer.phone }}" required></label>
+    </div>
+    <div class="row">
+      <label>Email<input type="email" name="email" value="{{ customer.email or '' }}"></label>
+      <label>Address<input name="address" value="{{ customer.address or '' }}"></label>
+    </div>
+    <label>Notes<textarea name="notes" rows="4">{{ customer.notes or '' }}</textarea></label>
+    <div class="actions"><button class="btn primary">Save Changes</button><a class="btn outline" href="{{ url_for('customers.customer_detail', cid=customer.id) }}">Cancel</a></div>
+  </form>
+</main>
+{% endblock %}

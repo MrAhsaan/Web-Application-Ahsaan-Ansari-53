@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container admin">
+  <div class="admin-head"><div><span class="tag">WORKSHOP</span><h1>New <em>Job Card</em></h1><p>Create a workshop record from an existing booking or manually.</p></div><a class="btn outline" href="{{url_for('jobs.job_list')}}">All Job Cards</a></div>
+  <form class="panel form-wide" method="POST" id="jobForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row">
+      <label>Customer *<select name="customer_id" id="customer" required><option value="">Select customer</option>{% for c in customers %}<option value="{{c.id}}">{{c.name}} · {{c.phone}}</option>{% endfor %}</select></label>
+      <label>Vehicle *<select name="vehicle_id" id="vehicle" required><option value="">Select vehicle</option>{% for v in vehicles %}<option value="{{v.id}}" data-customer="{{v.customer_id}}">{{v.registration or 'No registration'}} · {{v.brand or ''}} {{v.model}}</option>{% endfor %}</select></label>
+    </div>
+    <label>Related Booking<select name="booking_id" id="booking"><option value="">None</option>{% for b in bookings %}<option value="{{b.id}}" data-customer="{{b.customer_id}}" data-vehicle="{{b.vehicle_id}}">#{{b.booking_no or b.id}} · {{b.customer_name}} · {{b.service_name or 'Service'}} · {{b.date}} {{b.time}}</option>{% endfor %}</select></label>
+    <div class="row"><label>Customer Complaint<textarea name="complaint" placeholder="What problem did the customer report?"></textarea></label><label>Diagnosis<textarea name="diagnosis" placeholder="Technician diagnosis / inspection findings"></textarea></label></div>
+    <label>Work Done<textarea name="work_done" placeholder="Describe completed work, repairs and checks"></textarea></label>
+    <div class="row"><label>Technician<select name="technician_id"><option value="">Unassigned</option>{% for t in technicians %}<option value="{{t.id}}">{{t.name}}{% if t.specialization %} · {{t.specialization }}{% endif %}</option>{% endfor %}</select></label><label>Odometer<input type="number" min="0" name="odometer" placeholder="Current km"></label></div>
+    <h2>Services / Parts / Labour</h2>
+    <div id="items">
+      <div class="item-row row">
+        <select name="item_type[]"><option value="service">Service</option><option value="part">Part</option><option value="labor">Labour</option><option value="other">Other</option></select>
+        <select name="item_service_id[]"><option value="">No linked service</option>{% for s in services %}<option value="{{s.id}}" data-price="{{s.base_price}}">{{s.name}}{% if s.base_price %} · ₹{{"%.2f"|format(s.base_price)}}{% endif %}</option>{% endfor %}</select>
+        <input name="item_description[]" placeholder="Description">
+        <input type="number" min="0.01" step="0.01" name="item_quantity[]" value="1" placeholder="Qty">
+        <input type="number" min="0" step="0.01" name="item_unit_price[]" value="0" placeholder="Unit price">
+        <button type="button" class="btn outline remove-item" onclick="removeItem(this)">×</button>
+      </div>
+    </div>
+    <button type="button" class="btn outline" onclick="addItem()">+ Add Item</button>
+    <div class="row"><label>Status<select name="status">{% for s in ['Open','In Progress','Ready','Closed'] %}<option>{{s}}</option>{% endfor %}</select></label><label>Notes<textarea name="notes" placeholder="Internal workshop notes"></textarea></label></div>
+    <button class="btn primary">Create Job Card →</button>
+  </form>
+</main>
+<script>
+const customer=document.getElementById('customer'), vehicle=document.getElementById('vehicle'), booking=document.getElementById('booking');
+function filterVehicles(){const id=customer.value; [...vehicle.options].forEach(o=>{o.hidden=o.value && o.dataset.customer!==id;}); if(vehicle.selectedOptions[0]?.hidden) vehicle.value=''; filterBookings();}
+function filterBookings(){const c=customer.value,v=vehicle.value; [...booking.options].forEach(o=>{o.hidden=o.value && (o.dataset.customer!==c || o.dataset.vehicle!==v);}); if(booking.selectedOptions[0]?.hidden) booking.value='';}
+customer.addEventListener('change',filterVehicles); vehicle.addEventListener('change',filterBookings); filterVehicles();
+function wireItem(row){const service=row.querySelector('select[name="item_service_id[]"]'); const price=row.querySelector('input[name="item_unit_price[]"]'); const desc=row.querySelector('input[name="item_description[]"]'); service.addEventListener('change',()=>{const o=service.selectedOptions[0]; if(o.dataset.price && (!price.value || price.value==='0')) price.value=o.dataset.price; if(o.value && !desc.value) desc.value=o.textContent.split(' · ')[0];});}
+wireItem(document.querySelector('.item-row'));
+function addItem(){const row=document.querySelector('.item-row').cloneNode(true); row.querySelectorAll('input').forEach(i=>i.value=i.name.includes('quantity')?'1':''); row.querySelector('select[name="item_service_id[]"]').selectedIndex=0; document.getElementById('items').appendChild(row); wireItem(row);}
+function removeItem(btn){const rows=document.querySelectorAll('.item-row'); if(rows.length>1) btn.closest('.item-row').remove();}
+</script>
+{% endblock %}
